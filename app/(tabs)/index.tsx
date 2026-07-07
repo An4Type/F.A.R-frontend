@@ -2,7 +2,6 @@ import * as React from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import {
   Appbar,
-  Avatar,
   Button,
   Divider,
   IconButton,
@@ -12,7 +11,6 @@ import {
   TextInput,
 } from "react-native-paper";
 import DailyMacrosStats from "@/components/DailyMacrosStats";
-import UploadPhoto from "@/components/UploadPhoto";
 import { getFoodList } from "../services/api";
 import { router, useNavigation } from "expo-router";
 import TokenStorage from "../services/tokenStorage";
@@ -20,11 +18,10 @@ import { ReactStorage, ValEnum } from "../services/reactStorage";
 
 export default function HomeScreen() {
   const [data, setData] = React.useState(null);
-  const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState(null);
-  const [calories, setCalories] = React.useState(2700);
+  const [, setLoading] = React.useState(true);
+  const [, setError] = React.useState(null);
   const [caloriesGoal, setCaloriesGoal] = React.useState(4500);
-  const [adviceAI, setAdviceAI] = React.useState(
+  const [adviceAI] = React.useState(
     `Eat a balanced diet: include more vegetables, fruits, proteins, and whole grains, avoid overeating, and minimize sugar and processed food intake. Drink enough water, follow a regular eating schedule, and avoid late-night snacks.`
   );
   const [visibleMenu, setVisibleMenu] = React.useState(false);
@@ -95,9 +92,8 @@ export default function HomeScreen() {
     }
   };
 
-  const { nutrition, foodConsumed, goal: currentGoal } = data || {};
+  const { nutrition } = data || {};
   const totalCalories = nutrition?.calories || 0;
-  const fats = nutrition?.fats || 0;
 
   const openMenu = () => setVisibleMenu(true);
   const closeMenu = () => setVisibleMenu(false);
@@ -163,7 +159,6 @@ export default function HomeScreen() {
               <Menu.Item onPress={handleLogOut} title="Log out" />
             </Menu>
           </View>
-          <UploadPhoto />
         </Appbar.Header>
         <View style={styles.header}>
           <Text style={styles.title}>Today</Text>
