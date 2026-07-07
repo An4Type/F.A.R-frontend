@@ -1,14 +1,11 @@
 import * as React from "react";
 import {
-  ScrollView,
   StyleSheet,
   Text,
   View,
   ImageBackground,
 } from "react-native";
-import { Appbar, Avatar, Button } from "react-native-paper";
-import DailyMacrosStats from "@/components/DailyMacrosStats";
-import UploadPhoto from "@/components/UploadPhoto";
+import { Button } from "react-native-paper";
 import TextInput from "@/components/Login/TextInput";
 import { loginRequest } from "./services/auth";
 import { router } from "expo-router";
@@ -16,11 +13,6 @@ import { router } from "expo-router";
 export default function LoginPage() {
   const [email, setEmail] = React.useState({ value: "" });
   const [password, setPassword] = React.useState({ value: "" });
-  const [calories, setCalories] = React.useState(2700);
-  const [caloriesGoal, setCaloriesGoal] = React.useState(4500);
-  const [adviceAI, setAdviceAI] = React.useState(
-    `Eat a balanced diet: include more vegetables, fruits, proteins, and whole grains, avoid overeating, and minimize sugar and processed food intake. Drink enough water, follow a regular eating schedule, and avoid late-night snacks.`
-  );
 
   const handleSignIn = async () => {
     try {

@@ -6,9 +6,8 @@ import {
   View,
   ActivityIndicator,
 } from "react-native";
-import { Appbar, Avatar, Button } from "react-native-paper";
+import { Appbar, Button } from "react-native-paper";
 import { getFoodList } from "../services/api";
-import { useFocusEffect } from "@react-navigation/native";
 import { ReactStorage, ValEnum } from "../services/reactStorage";
 import { useNavigation } from "expo-router";
 
@@ -91,10 +90,9 @@ export default function Explore() {
     );
   }
 
-  const { nutrition, foodConsumed, goal } = data || {};
+  const { nutrition, foodConsumed } = data || {};
   const totalCalories = nutrition?.calories || 0;
   const macros = nutrition || { fats: 0, carbohydrates: 0, proteins: 0 };
-  const calorieGoal = goal?.nutrition?.calories || 4500;
 
   return (
     <View style={styles.index}>

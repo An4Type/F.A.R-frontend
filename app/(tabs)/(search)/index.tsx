@@ -1,6 +1,5 @@
 import React, { useRef, useState } from "react";
-import { Href, Link, router } from "expo-router";
-import ImagePicker from "react-native-image-crop-picker";
+import { router } from "expo-router";
 import {
   StyleSheet,
   SafeAreaView,
@@ -8,12 +7,10 @@ import {
   TouchableOpacity,
   View,
   ActivityIndicator,
-  Linking,
   Image,
 } from "react-native";
 import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
-import * as FileSystem from "expo-file-system";
-import { Searchbar, Button, TextInput } from "react-native-paper";
+import { Button, TextInput } from "react-native-paper";
 import { addFoodConsumedLight, getFoodByPhoto } from "@/app/services/api";
 import { ReactStorage, ValEnum } from "@/app/services/reactStorage";
 
@@ -23,14 +20,11 @@ const UploadPhoto = () => {
   const [photoTaken, setPhotoTaken] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<any>(null);
   const cameraRef = useRef<CameraView>(null);
-  const [searchQuery, setSearchQuery] = useState<string>("");
   const [food, setFood] = useState("");
   const [grams, setGrams] = useState();
   const [photoUri, setPhotoUri] = useState("");
 
-  const [file, setFile] = useState<File | null>(null);
   const [showCamera, setShowCamera] = useState(false);
 
   const toggleCameraType = () => {

@@ -5,17 +5,17 @@ const TOKEN_KEY = "TOKEN";
 
 const TokenStorage = {
   loadToken:
-    Platform.OS == "web"
+    Platform.OS === "web"
       ? async () => localStorage.getItem(TOKEN_KEY)
       : async () => AsyncStorage.getItem(TOKEN_KEY),
 
   saveToken:
-    Platform.OS == "web"
+    Platform.OS === "web"
       ? async (token: string) => localStorage.setItem(TOKEN_KEY, token)
       : async (token: string) => AsyncStorage.setItem(TOKEN_KEY, token),
 
   deleteToken:
-    Platform.OS == "web"
+    Platform.OS === "web"
       ? async () => localStorage.removeItem(TOKEN_KEY)
       : async () => AsyncStorage.removeItem(TOKEN_KEY),
 };
