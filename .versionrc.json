@@ -1,0 +1,48 @@
+{
+    "types": [
+        {
+            "type": "feat",
+            "section": "Features"
+        },
+        {
+            "type": "fix",
+            "section": "Bug Fixes"
+        },
+        {
+            "type": "perf",
+            "section": "Performance Improvements"
+        },
+        {
+            "type": "merge",
+            "section": "Merges"
+        },
+        {
+            "type": "refactor",
+            "hidden": true
+        },
+        {
+            "type": "style",
+            "hidden": true
+        },
+        {
+            "type": "test",
+            "hidden": true
+        },
+        {
+            "type": "build",
+            "hidden": true
+        },
+        {
+            "type": "ops",
+            "hidden": true
+        },
+        {
+            "type": "docs",
+            "hidden": true
+        },
+        {
+            "type": "chore",
+            "hidden": true
+        }
+    ]
+}
