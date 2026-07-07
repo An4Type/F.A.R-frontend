@@ -110,10 +110,14 @@ export default function HomeScreen() {
   const closeModal = () => setVisibleModal(false);
 
   const handleGoalSubmit = () => {
-    setCaloriesGoal(goal); // Обновляем цель калорий
+    const parsedGoal = parseInt(goal, 10);
+    if (isNaN(parsedGoal) || parsedGoal <= 0) {
+      return;
+    }
 
-    setGoal(""); // Очистка поля ввода после отправки
-    closeModal(); // Закрытие модального окна
+    setCaloriesGoal(parsedGoal);
+    setGoal("");
+    closeModal();
   };
 
   const handleLogOut = () => {
