@@ -1,25 +1,67 @@
 import axios from "axios";
+import Constants from "expo-constants";
 import FormData from "form-data";
 import { CameraCapturedPicture } from "expo-camera";
 import { Platform } from "react-native";
-import TokenStorage from "../services/tokenStorage";
+import { router } from "expo-router";
+import TokenStorage from "./tokenStorage";
 
-export const localhost = "http://34.66.153.5:3000";
+const apiUrl = Constants.expoConfig?.extra?.apiUrl;
+if (!apiUrl) {
+    throw new Error(
+        "Missing API_URL. Copy .env.example to .env, set API_URL, and restart the dev server."
+    );
+}
 
-const api = axios.create({
-    baseURL: localhost,
+export const api = axios.create({
+    baseURL: apiUrl,
 });
 
-interface User {
-    id: number;
-    username: string;
-    email: string;
+api.interceptors.request.use(async (config) => {
+    const token = await TokenStorage.loadToken();
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+});
+
+api.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+        const hadAuthHeader = Boolean(error.config?.headers?.Authorization);
+        if (error.response?.status === 401 && hadAuthHeader) {
+            await TokenStorage.deleteToken();
+            router.replace("/LoginPage");
+        }
+        return Promise.reject(error);
+    }
+);
+
+export interface Nutrition {
+    calories: number;
+    proteins: number;
+    carbohydrates: number;
+    fats: number;
 }
-interface FoodList {
-    id: number;
+
+export interface ConsumedFoodItem {
+    food: { name: string; canName?: string };
+    nutrition: Nutrition;
+}
+
+export interface Goal {
+    nutrition: Nutrition;
+}
+
+export interface DayInfo {
+    nutrition: Nutrition;
+    foodConsumed: ConsumedFoodItem[];
+    goal?: Goal;
+}
+
+export interface FoodRecognitionResult {
     name: string;
-    info: string;
-    photo: object;
+    canName: string;
 }
 
 interface FoodData {
@@ -27,50 +69,33 @@ interface FoodData {
     foodCanName: string;
 }
 
-export const getFoodByPhoto = async (photo: CameraCapturedPicture) => {
+export const getFoodByPhoto = async (
+    photo: CameraCapturedPicture
+): Promise<{ food: FoodRecognitionResult; uri: string }> => {
     const formData = new FormData();
 
     const uri = Platform.OS === "android" ? photo.uri : photo.uri.replace("file://", "");
     formData.append("photo", {
-        uri: uri,
+        uri,
         name: `photo_${Date.now()}.jpg`,
         type: "image/jpeg",
     });
 
-    try {
-        const response = await axios({
-            method: "post",
-            url: localhost + "/food/getFoodByPhoto",
-            data: formData,
-            headers: {
-                "Content-Type": `multipart/form-data`,
-            },
-        });
-
-        return { response: response, uri: uri }; // Вернуть данные с сервера
-    } catch (error) {
-        console.error("Error uploading photo:", error);
-        throw error; // Пробросить ошибку дальше
-    }
-};
-
-// GET [2]
-export const getFoodList = async (): Promise<FoodList[]> => {
-    const token = await TokenStorage.loadToken();
-    const response = await api.get("/day/getUserDayInfoListLight", {
+    const response = await api.post<FoodRecognitionResult>("/food/getFoodByPhoto", formData, {
         headers: {
-            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
         },
     });
+
+    return { food: response.data, uri };
+};
+
+export const getFoodList = async (): Promise<DayInfo[]> => {
+    const response = await api.get<DayInfo[]>("/day/getUserDayInfoListLight");
     return response.data;
 };
 
-export const addFoodConsumedLight = async (foodData: FoodData): Promise<User[]> => {
-    const token = await TokenStorage.loadToken();
-    const response = await api.post("/user/addFoodConsumedLight", foodData, {
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
-    });
+export const addFoodConsumedLight = async (foodData: FoodData): Promise<DayInfo> => {
+    const response = await api.post<DayInfo>("/user/addFoodConsumedLight", foodData);
     return response.data;
 };

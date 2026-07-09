@@ -1,21 +1,20 @@
-import axios from "axios";
 import { router } from "expo-router";
 import TokenStorage from "../services/tokenStorage";
-import { localhost } from "./api";
+import { api } from "./api";
 
-interface User {
+interface AuthResponse {
+    token: string;
     username: string;
     email: string;
-    password: string;
 }
 
 export const registerRequest = async (
     username: string,
     email: string,
     password: string
-): Promise<User | void> => {
+): Promise<AuthResponse | void> => {
     try {
-        const response = await axios.post(localhost + "/user", {
+        const response = await api.post<AuthResponse>("/user", {
             username,
             email,
             password,
@@ -24,7 +23,7 @@ export const registerRequest = async (
             router.replace("../LoginPage", { relativeToDirectory: true });
         }
         console.log("Register successful:", response.data);
-        return response.data; // Assuming response.data is of type User
+        return response.data;
     } catch (error: any) {
         console.error("Login failed:", error.response ? error.response.data : error.message);
     }
@@ -33,9 +32,9 @@ export const registerRequest = async (
 export const loginRequest = async (
     usernameOrEmail: string,
     password: string
-): Promise<User | void> => {
+): Promise<AuthResponse | void> => {
     try {
-        const response = await axios.post(localhost + "/user/login", {
+        const response = await api.post<AuthResponse>("/user/login", {
             usernameOrEmail,
             password,
         });
@@ -44,7 +43,7 @@ export const loginRequest = async (
         }
         console.log("Login successful:", response.data);
         await TokenStorage.saveToken(response.data.token);
-        return response.data; // Assuming response.data is of type User
+        return response.data;
     } catch (error: any) {
         console.error("Login failed:", error.response ? error.response.data : error.message);
     }

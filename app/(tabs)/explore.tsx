@@ -1,12 +1,12 @@
 import * as React from "react";
 import { ScrollView, StyleSheet, Text, View, ActivityIndicator } from "react-native";
 import { Appbar, Button } from "react-native-paper";
-import { getFoodList } from "../services/api";
+import { DayInfo, getFoodList } from "../services/api";
 import { ReactStorage, ValEnum } from "../services/reactStorage";
 import { useNavigation } from "expo-router";
 
 export default function Explore() {
-    const [data, setData] = React.useState(null);
+    const [data, setData] = React.useState<DayInfo | null>(null);
     const [loading, setLoading] = React.useState(true);
     const [error, setError] = React.useState(null);
 
@@ -84,7 +84,7 @@ export default function Explore() {
         );
     }
 
-    const { nutrition, foodConsumed } = data || {};
+    const { nutrition, foodConsumed = [] } = data || {};
     const totalCalories = nutrition?.calories || 0;
     const macros = nutrition || { fats: 0, carbohydrates: 0, proteins: 0 };
 

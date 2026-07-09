@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
 import { Button, TextInput } from "react-native-paper";
-import { addFoodConsumedLight, getFoodByPhoto } from "@/app/services/api";
+import { addFoodConsumedLight, FoodRecognitionResult, getFoodByPhoto } from "@/app/services/api";
 import { ReactStorage, ValEnum } from "@/app/services/reactStorage";
 
 const UploadPhoto = () => {
@@ -21,8 +21,8 @@ const UploadPhoto = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const cameraRef = useRef<CameraView>(null);
-    const [food, setFood] = useState("");
-    const [grams, setGrams] = useState();
+    const [food, setFood] = useState<FoodRecognitionResult | null>(null);
+    const [grams, setGrams] = useState("");
     const [photoUri, setPhotoUri] = useState("");
 
     const [showCamera, setShowCamera] = useState(false);
@@ -36,7 +36,7 @@ const UploadPhoto = () => {
     const handleAcceptFood = async () => {
         try {
             const gramsValue = parseFloat(grams);
-            if (isNaN(gramsValue)) {
+            if (isNaN(gramsValue) || !food) {
                 setError("Invalid number of grams");
                 return;
             }
@@ -62,11 +62,10 @@ const UploadPhoto = () => {
                 });
 
                 if (photo?.uri) {
-                    const response = await getFoodByPhoto(photo);
+                    const result = await getFoodByPhoto(photo);
 
-                    // Assuming `getFoodByPhoto` expects FormData
-                    setFood(response.response.data);
-                    setPhotoUri(response.uri);
+                    setFood(result.food);
+                    setPhotoUri(result.uri);
 
                     setPhotoTaken(true);
                 }

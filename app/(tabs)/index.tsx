@@ -11,13 +11,13 @@ import {
     TextInput,
 } from "react-native-paper";
 import DailyMacrosStats from "@/components/DailyMacrosStats";
-import { getFoodList } from "../services/api";
+import { DayInfo, getFoodList } from "../services/api";
 import { router, useNavigation } from "expo-router";
 import TokenStorage from "../services/tokenStorage";
 import { ReactStorage, ValEnum } from "../services/reactStorage";
 
 export default function HomeScreen() {
-    const [data, setData] = React.useState(null);
+    const [data, setData] = React.useState<DayInfo | null>(null);
     const [, setLoading] = React.useState(true);
     const [, setError] = React.useState(null);
     const [caloriesGoal, setCaloriesGoal] = React.useState(4500);
