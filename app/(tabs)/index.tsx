@@ -10,16 +10,13 @@ import {
     Modal,
     TextInput,
 } from "react-native-paper";
+import { useFocusEffect } from "@react-navigation/native";
 import DailyMacrosStats from "@/components/DailyMacrosStats";
-import { DayInfo, getFoodList } from "../services/api";
-import { router, useNavigation } from "expo-router";
-import TokenStorage from "../services/tokenStorage";
-import { ReactStorage, ValEnum } from "../services/reactStorage";
+import { router } from "expo-router";
+import { useAuthStore } from "@/store/authStore";
+import { useDayInfoQuery } from "@/queries/useDayInfo";
 
 export default function HomeScreen() {
-    const [data, setData] = React.useState<DayInfo | null>(null);
-    const [, setLoading] = React.useState(true);
-    const [, setError] = React.useState(null);
     const [caloriesGoal, setCaloriesGoal] = React.useState(4500);
     const [adviceAI] = React.useState(
         `Eat a balanced diet: include more vegetables, fruits, proteins, and whole grains, avoid overeating, and minimize sugar and processed food intake. Drink enough water, follow a regular eating schedule, and avoid late-night snacks.`
@@ -28,69 +25,26 @@ export default function HomeScreen() {
     const [visibleModal, setVisibleModal] = React.useState(false); // Состояние для управления модальным окном
     const [goal, setGoal] = React.useState("");
 
-    const navigation = useNavigation();
-    React.useEffect(() => {
-        const unsubscribeFocus = navigation.addListener("focus", async () => {
-            console.log("Screen is focused");
-            const dataString = await ReactStorage.loadVal(ValEnum.DAILYINFO);
-            if (dataString) {
-                const data = JSON.parse(dataString);
-                setData(data);
-            }
-        });
-
-        const unsubscribeBlur = navigation.addListener("blur", () => {
-            console.log("Screen is unfocused");
-        });
-
-        return () => {
-            // Cleanup event listeners
-            unsubscribeFocus();
-            unsubscribeBlur();
-        };
-    }, [navigation]);
-
-    const checkJwtTocken = async (): Promise<boolean> => {
-        return !!(await TokenStorage.loadToken());
-    };
+    const hasHydrated = useAuthStore((state) => state.hasHydrated);
+    const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+    const logout = useAuthStore((state) => state.logout);
 
     React.useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await getFoodList();
-                ReactStorage.saveVal(ValEnum.DAILYINFO, response[0]);
-                setData(response[0]);
-            } catch (err) {
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
-        };
-        checkJwtTocken().then((val) => {
-            console.log(val);
-            if (val) {
-                fetchData();
-            } else {
-                router.replace("./LoginPage");
-            }
-        });
-
-        // fetchData();
-    }, []);
-
-    const refreshData = async () => {
-        try {
-            setLoading(true);
-            console.log("Данные обновляются...");
-            const response = await getFoodList();
-            setData(response[0]);
-        } catch (err) {
-            setError(err.message);
-            console.error("Ошибка при обновлении данных:", err);
-        } finally {
-            setLoading(false);
+        if (hasHydrated && !isAuthenticated) {
+            router.replace("./LoginPage");
         }
-    };
+    }, [hasHydrated, isAuthenticated]);
+
+    const { data: dayInfoList, refetch, isFetching } = useDayInfoQuery();
+    const data = dayInfoList?.[0];
+
+    useFocusEffect(
+        React.useCallback(() => {
+            if (isAuthenticated) {
+                refetch();
+            }
+        }, [isAuthenticated, refetch])
+    );
 
     const { nutrition } = data || {};
     const totalCalories = nutrition?.calories || 0;
@@ -117,9 +71,8 @@ export default function HomeScreen() {
     };
 
     const handleLogOut = () => {
-        TokenStorage.deleteToken().then(() => {
-            router.replace("./LoginPage");
-        });
+        logout();
+        router.replace("./LoginPage");
     };
 
     return (
@@ -181,7 +134,8 @@ export default function HomeScreen() {
                         mode="contained"
                         buttonColor="#89BD71"
                         style={{ marginTop: 50 }}
-                        onPress={refreshData}
+                        loading={isFetching}
+                        onPress={() => refetch()}
                     >
                         Refresh
                     </Button>

@@ -11,14 +11,14 @@ import {
 } from "react-native";
 import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
 import { Button, TextInput } from "react-native-paper";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { addFoodConsumedLight, FoodRecognitionResult, getFoodByPhoto } from "@/app/services/api";
-import { ReactStorage, ValEnum } from "@/app/services/reactStorage";
+import { dayInfoQueryKey } from "@/queries/useDayInfo";
 
 const UploadPhoto = () => {
     const [cameraType, setCameraType] = useState<CameraType>("back");
     const [permission, requestPermission] = useCameraPermissions();
     const [photoTaken, setPhotoTaken] = useState<boolean>(false);
-    const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const cameraRef = useRef<CameraView>(null);
     const [food, setFood] = useState<FoodRecognitionResult | null>(null);
@@ -26,6 +26,15 @@ const UploadPhoto = () => {
     const [photoUri, setPhotoUri] = useState("");
 
     const [showCamera, setShowCamera] = useState(false);
+
+    const queryClient = useQueryClient();
+    const getFoodByPhotoMutation = useMutation({ mutationFn: getFoodByPhoto });
+    const addFoodMutation = useMutation({
+        mutationFn: addFoodConsumedLight,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: dayInfoQueryKey });
+        },
+    });
 
     const toggleCameraType = () => {
         setCameraType((current) => (current === "back" ? "front" : "back"));
@@ -40,11 +49,10 @@ const UploadPhoto = () => {
                 setError("Invalid number of grams");
                 return;
             }
-            const dailyInfo = await addFoodConsumedLight({
+            await addFoodMutation.mutateAsync({
                 mass: gramsValue,
                 foodCanName: food.canName,
             });
-            ReactStorage.saveVal(ValEnum.DAILYINFO, dailyInfo);
         } catch (error) {
             console.error("Error:", error);
             setError("Error submitting food");
@@ -54,7 +62,6 @@ const UploadPhoto = () => {
     const takePhoto = async () => {
         if (cameraRef.current) {
             try {
-                setLoading(true);
                 const photo = await cameraRef.current.takePictureAsync({
                     quality: 1,
                     base64: true,
@@ -62,7 +69,7 @@ const UploadPhoto = () => {
                 });
 
                 if (photo?.uri) {
-                    const result = await getFoodByPhoto(photo);
+                    const result = await getFoodByPhotoMutation.mutateAsync(photo);
 
                     setFood(result.food);
                     setPhotoUri(result.uri);
@@ -72,8 +79,6 @@ const UploadPhoto = () => {
             } catch (err) {
                 console.error("Ошибка при создании фото:", err);
                 setError("Error taking photo");
-            } finally {
-                setLoading(false);
             }
         }
     };
@@ -143,6 +148,7 @@ const UploadPhoto = () => {
                                     <Button
                                         mode="contained"
                                         buttonColor="#89BD71"
+                                        loading={addFoodMutation.isPending}
                                         onPress={handleAcceptFood}
                                         style={{ marginTop: 20, marginBottom: 30, width: "80%" }}
                                     >
@@ -153,7 +159,7 @@ const UploadPhoto = () => {
                                     </Button>
                                 </View>
                             )}
-                            {loading && (
+                            {getFoodByPhotoMutation.isPending && (
                                 <ActivityIndicator
                                     size="large"
                                     color="#0000ff"

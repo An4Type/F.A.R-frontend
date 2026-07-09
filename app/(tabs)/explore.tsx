@@ -1,73 +1,20 @@
 import * as React from "react";
 import { ScrollView, StyleSheet, Text, View, ActivityIndicator } from "react-native";
 import { Appbar, Button } from "react-native-paper";
-import { DayInfo, getFoodList } from "../services/api";
-import { ReactStorage, ValEnum } from "../services/reactStorage";
-import { useNavigation } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
+import { useDayInfoQuery } from "@/queries/useDayInfo";
 
 export default function Explore() {
-    const [data, setData] = React.useState<DayInfo | null>(null);
-    const [loading, setLoading] = React.useState(true);
-    const [error, setError] = React.useState(null);
+    const { data: dayInfoList, isLoading, isFetching, error, refetch } = useDayInfoQuery();
+    const data = dayInfoList?.[0];
 
-    const navigation = useNavigation();
-    React.useEffect(() => {
-        const unsubscribeFocus = navigation.addListener("focus", async () => {
-            console.log("Screen is focused");
-            ReactStorage.loadVal(ValEnum.DAILYINFO)
-                .then((dataString) => {
-                    if (dataString) {
-                        const data = JSON.parse(dataString);
-                        setData(data);
-                    }
-                })
-                .catch((error) => {
-                    setError(error);
-                })
-                .finally(() => setLoading(false));
-        });
+    useFocusEffect(
+        React.useCallback(() => {
+            refetch();
+        }, [refetch])
+    );
 
-        const unsubscribeBlur = navigation.addListener("blur", () => {
-            console.log("Screen is unfocused");
-        });
-
-        return () => {
-            // Cleanup event listeners
-            unsubscribeFocus();
-            unsubscribeBlur();
-        };
-    }, [navigation]);
-
-    const refreshData = async () => {
-        try {
-            setLoading(true);
-            console.log("Данные обновляются...");
-            const response = await getFoodList(); // Вызов API для получения новых данных
-            setData(response[0]); // Обновление состояния с новыми данными
-        } catch (err) {
-            setError(err.message);
-            console.error("Ошибка при обновлении данных:", err);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // React.useEffect(() => {
-    //   const fetchData = async () => {
-    //     try {
-    //       const response = await getFoodList(); // Fetch data from server
-    //       setData(response[0]); // Assuming response is an array, use the first item
-    //     } catch (err) {
-    //       setError(err.message);
-    //     } finally {
-    //       setLoading(false);
-    //     }
-    //   };
-
-    //   fetchData();
-    // }, []);
-
-    if (loading) {
+    if (isLoading) {
         return (
             <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color="#89BD71" />
@@ -79,7 +26,9 @@ export default function Explore() {
     if (error) {
         return (
             <View style={styles.errorContainer}>
-                <Text style={styles.errorText}>Error: {error}</Text>
+                <Text style={styles.errorText}>
+                    Error: {error instanceof Error ? error.message : "Something went wrong"}
+                </Text>
             </View>
         );
     }
@@ -127,7 +76,8 @@ export default function Explore() {
                         icon="refresh"
                         mode="contained"
                         buttonColor="#89BD71"
-                        onPress={refreshData}
+                        loading={isFetching}
+                        onPress={() => refetch()}
                     >
                         Refresh
                     </Button>

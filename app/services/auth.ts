@@ -1,6 +1,6 @@
 import { router } from "expo-router";
-import TokenStorage from "../services/tokenStorage";
 import { api } from "./api";
+import { useAuthStore } from "@/store/authStore";
 
 interface AuthResponse {
     token: string;
@@ -42,7 +42,7 @@ export const loginRequest = async (
             router.replace("../.", { relativeToDirectory: true });
         }
         console.log("Login successful:", response.data);
-        await TokenStorage.saveToken(response.data.token);
+        useAuthStore.getState().login(response.data.token);
         return response.data;
     } catch (error: any) {
         console.error("Login failed:", error.response ? error.response.data : error.message);

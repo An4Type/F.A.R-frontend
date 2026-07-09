@@ -4,7 +4,7 @@ import FormData from "form-data";
 import { CameraCapturedPicture } from "expo-camera";
 import { Platform } from "react-native";
 import { router } from "expo-router";
-import TokenStorage from "./tokenStorage";
+import { useAuthStore } from "@/store/authStore";
 
 const apiUrl = Constants.expoConfig?.extra?.apiUrl;
 if (!apiUrl) {
@@ -17,8 +17,8 @@ export const api = axios.create({
     baseURL: apiUrl,
 });
 
-api.interceptors.request.use(async (config) => {
-    const token = await TokenStorage.loadToken();
+api.interceptors.request.use((config) => {
+    const token = useAuthStore.getState().token;
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
     }
@@ -27,10 +27,10 @@ api.interceptors.request.use(async (config) => {
 
 api.interceptors.response.use(
     (response) => response,
-    async (error) => {
+    (error) => {
         const hadAuthHeader = Boolean(error.config?.headers?.Authorization);
         if (error.response?.status === 401 && hadAuthHeader) {
-            await TokenStorage.deleteToken();
+            useAuthStore.getState().logout();
             router.replace("/LoginPage");
         }
         return Promise.reject(error);
