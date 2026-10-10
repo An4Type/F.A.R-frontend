@@ -1,16 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
-import { getFoodList } from "@/app/services/api";
-import { useAuthStore } from "@/store/authStore";
+import { useAuthStore } from "@/features/auth";
+import { foodApi } from "@/features/food/api";
 
 export const dayInfoQueryKey = ["dayInfoList"] as const;
 
-export function useDayInfoQuery() {
+export function useDayInfoQuery({ enabled = true }: { enabled?: boolean } = {}) {
     const hasHydrated = useAuthStore((state) => state.hasHydrated);
     const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
     return useQuery({
         queryKey: dayInfoQueryKey,
-        queryFn: getFoodList,
-        enabled: hasHydrated && isAuthenticated,
+        queryFn: foodApi.getFoodList,
+        enabled: enabled && hasHydrated && isAuthenticated,
     });
 }
