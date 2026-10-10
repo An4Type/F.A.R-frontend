@@ -1,3 +1,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* See how to change style for tabBar a link item and remove it*/
+/* e.g. in app/global.css, or wherever your global web styles live */
+[role="tab"] {
+    justify-content: center !important;
+}
