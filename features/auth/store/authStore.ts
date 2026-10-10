@@ -1,5 +1,7 @@
+import { router } from "expo-router";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+import { configureApiAuth } from "@/lib/api/client";
 import { queryClient } from "@/lib/queryClient";
 import { zustandStorage } from "@/lib/zustandStorage";
 
@@ -38,3 +40,11 @@ export const useAuthStore = create<AuthState>()(
         }
     )
 );
+
+configureApiAuth({
+    getToken: () => useAuthStore.getState().token,
+    onUnauthorized: () => {
+        useAuthStore.getState().logout();
+        router.replace("/login");
+    },
+});
