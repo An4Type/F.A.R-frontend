@@ -2,11 +2,11 @@ import { useState, type ComponentProps, type ReactNode } from "react";
 import { View } from "react-native";
 import Animated, {
     interpolate,
-    runOnJS,
     useAnimatedStyle,
     useSharedValue,
     withTiming,
 } from "react-native-reanimated";
+import { scheduleOnRN } from "react-native-worklets";
 import { authApi } from "@/features/auth/api";
 import { AuthHeader } from "@/features/auth/components/AuthHeader";
 import { LoginForm } from "@/features/auth/components/LoginForm";
@@ -40,9 +40,10 @@ export function LoginScreen() {
         flip.value = withTiming(1, { duration: FLIP_DURATION }, (finished) => {
             if (finished) {
                 flip.value = 0;
-                // Uses runOnJS to ensure state updates happen on the JS thread after the animation completes
-                runOnJS(setStage)("auth");
-                runOnJS(setFacing)("front");
+                // The callback runs on the UI thread, so state updates are
+                // scheduled back onto the JS (React Native) thread.
+                scheduleOnRN(setStage, "auth");
+                scheduleOnRN(setFacing, "front");
             }
         });
     };

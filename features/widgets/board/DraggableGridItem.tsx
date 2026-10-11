@@ -2,11 +2,12 @@ import { type ReactNode } from "react";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
     Easing,
-    runOnJS,
     useAnimatedStyle,
     useSharedValue,
     withTiming,
+    type SharedValue,
 } from "react-native-reanimated";
+import { scheduleOnRN } from "react-native-worklets";
 import type { PackedRect } from "@/features/widgets/layout/packGrid";
 
 // Matches WidgetSettingsModal's spotlight clone, which uses Reanimated's
@@ -24,7 +25,7 @@ interface DraggableGridItemProps {
     // All current items' rects, kept in a shared value by the parent so the
     // gesture worklet can check intersections between widgets on the UI thread without
     // crossing back to JS every frame.
-    rectsShared: Animated.SharedValue<Record<string, PackedRect>>;
+    rectsShared: SharedValue<Record<string, PackedRect>>;
     onDragStart: (id: string) => void;
     onDragOverChange: (id: string | null) => void;
     onDrop: (fromId: string, toId: string | null) => void;
@@ -61,7 +62,7 @@ export function DraggableGridItem({
         .hitSlop({ top: 0, height: HANDLE_HEIGHT })
         .onStart(() => {
             isDragging.value = true;
-            runOnJS(onDragStart)(id);
+            scheduleOnRN(onDragStart, id);
         })
         .onUpdate((event) => {
             translateX.value = event.translationX;
@@ -90,7 +91,7 @@ export function DraggableGridItem({
 
             if (nearestId !== currentTargetId.value) {
                 currentTargetId.value = nearestId;
-                runOnJS(onDragOverChange)(nearestId);
+                scheduleOnRN(onDragOverChange, nearestId);
             }
         })
         .onEnd(() => {
@@ -99,8 +100,8 @@ export function DraggableGridItem({
             translateY.value = 0;
             const target = currentTargetId.value;
             currentTargetId.value = null;
-            runOnJS(onDrop)(id, target);
-            runOnJS(onDragOverChange)(null);
+            scheduleOnRN(onDrop, id, target);
+            scheduleOnRN(onDragOverChange, null);
         });
 
     // Holding still (rather than dragging) while editing opens this widget's
@@ -110,7 +111,7 @@ export function DraggableGridItem({
         .enabled(editing && !!onOpenSettings)
         .minDuration(400)
         .onStart(() => {
-            if (onOpenSettings) runOnJS(onOpenSettings)(id);
+            if (onOpenSettings) scheduleOnRN(onOpenSettings, id);
         });
 
     const gesture = Gesture.Race(pan, longPressSettings);

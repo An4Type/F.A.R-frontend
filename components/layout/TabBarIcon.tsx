@@ -2,9 +2,11 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { type ComponentProps } from "react";
 import { View } from "react-native";
 
+type IoniconsProps = ComponentProps<typeof Ionicons>;
+
 interface TabBarIconProps {
-    name: ComponentProps<typeof Ionicons>["name"];
-    color: string;
+    name: IoniconsProps["name"];
+    color: IoniconsProps["color"];
     focused?: boolean;
 }
 

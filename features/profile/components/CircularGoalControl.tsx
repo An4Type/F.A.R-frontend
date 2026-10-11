@@ -36,11 +36,6 @@ export function CircularGoalControl({
     const [editing, setEditing] = useState(false);
     const [draft, setDraft] = useState(String(value));
     const inputRef = useRef<TextInput>(null);
-    // The value as of the last drag step; the prop lags a render behind.
-    const latestValue = useRef(value);
-    useEffect(() => {
-        latestValue.current = value;
-    }, [value]);
 
     const isOver = value > max;
     const pct = isOver ? 1 : Math.max(0, (value - min) / (max - min));
@@ -59,14 +54,13 @@ export function CircularGoalControl({
 
     const dragTo = (x: number, y: number) => {
         let next = valueAt(x, y);
-        const prev = latestValue.current;
         // Crossing 12 o'clock would jump straight between min and max; stop
-        // at whichever end the drag came from instead.
+        // at whichever end the drag came from instead. `value` may trail the
+        // drag by a frame, which is far below the half-range this checks for.
         const half = (max - min) / 2;
-        if (prev <= max && Math.abs(next - prev) > half) {
-            next = prev - min < half ? min : max;
+        if (value <= max && Math.abs(next - value) > half) {
+            next = value - min < half ? min : max;
         }
-        latestValue.current = next;
         onChange?.(next);
     };
 

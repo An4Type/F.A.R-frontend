@@ -2,7 +2,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { useState, type ReactNode, type RefObject } from "react";
 import { Pressable, Text, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import { runOnJS } from "react-native-reanimated";
+import { scheduleOnRN } from "react-native-worklets";
 import { colors } from "@/constants/theme";
 import { DraggableGridItem } from "@/features/widgets/board/DraggableGridItem";
 import type { WidgetInstance } from "@/features/widgets/core/types";
@@ -13,7 +13,7 @@ interface WidgetGridProps {
     layout: WidgetInstance[];
     grid: GridLayout;
     // Kept apart from `grid` (render data) so nothing reads a ref in render.
-    containerRef: RefObject<View>;
+    containerRef: RefObject<View | null>;
     editing: boolean;
     onEnterEdit: () => void;
     renderWidget: (widget: WidgetInstance, state: { isDragOver: boolean }) => ReactNode;
@@ -43,7 +43,7 @@ export function WidgetGrid({
         .enabled(!editing)
         .minDuration(550)
         .onStart(() => {
-            runOnJS(onEnterEdit)();
+            scheduleOnRN(onEnterEdit);
         });
 
     return (

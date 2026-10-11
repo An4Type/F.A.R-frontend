@@ -9,12 +9,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     icon: "./assets/images/icon.png",
     scheme: "myapp",
     userInterfaceStyle: "light",
-    newArchEnabled: true,
-    splash: {
-        image: "./assets/images/splash.png",
-        resizeMode: "contain",
-        backgroundColor: "#ffffff",
-    },
     ios: {
         supportsTablet: true,
     },
@@ -32,6 +26,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     },
     plugins: [
         "expo-router",
+        [
+            "expo-splash-screen",
+            {
+                image: "./assets/images/splash.png",
+                resizeMode: "contain",
+                backgroundColor: "#ffffff",
+            },
+        ],
         [
             "expo-build-properties",
             {
