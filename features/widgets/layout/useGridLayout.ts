@@ -24,11 +24,10 @@ export function resolveGrid(grid: GridConfig, width: number) {
 interface UseGridLayoutOptions {
     items: PackableItem[];
     grid: GridConfig;
-    // While editing, the grid grows to fit the add slot past the content.
     editing: boolean;
 }
 
-// Pure layout data for rendering — deliberately no refs in here, so
+// Pure layout data for rendering — no refs in here, so
 // components can read it during render.
 export function useGridLayout({ items, grid, editing }: UseGridLayoutOptions) {
     const [width, setWidth] = useState(0);
