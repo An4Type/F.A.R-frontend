@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
+import { BackHandler, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { EmptyState } from "@/components/layout/EmptyState";
-import { TAB_BAR_HEIGHT } from "@/constants/layout";
 import { useAuthStore } from "@/features/auth";
 import { HeaderLayout } from "@/features/dashboard/components/header/HeaderLayout";
 import { SetGoalModal } from "@/features/dashboard/components/modals/SetGoalModal";
@@ -11,6 +11,7 @@ import { useDayInfoQuery } from "@/features/food";
 import { useProfileStore } from "@/features/profile";
 import { widgetSystem } from "@/features/widget-catalog";
 import type { GridConfig } from "@/features/widgets";
+import { TAB_BAR_TOP_MARGIN } from "@/constants/layout";
 
 const GRID: GridConfig = {
     columns: (width) => (width >= 600 ? 4 : 2),
@@ -31,13 +32,35 @@ export function DashboardScreen() {
     const [goalModalOpen, setGoalModalOpen] = useState(false);
     const [headerHeight, setHeaderHeight] = useState(0);
 
+    // Sets editing to false when entering/leaving the screen,
+    // so that the dashboard is not left in edit mode when navigating
+    // away and back.
+    useFocusEffect(
+        useCallback(() => {
+            return () => setEditing(false);
+        }, [])
+    );
+
+    // Makes so Android back button exists edit mode instead of closing the app,
+    // Modals also register their own handler later, that runs before this.
+    useFocusEffect(
+        useCallback(() => {
+            if (!editing) return;
+            const subscription = BackHandler.addEventListener("hardwareBackPress", () => {
+                setEditing(false);
+                return true;
+            });
+            return () => subscription.remove();
+        }, [editing])
+    );
+
     const calories = dayInfo?.[0]?.nutrition.calories ?? 0;
 
     return (
         <View className="flex-1 bg-surface-app">
             <ScrollView
                 className="flex-1"
-                contentContainerStyle={{ paddingBottom: TAB_BAR_HEIGHT + insets.bottom + 20 }}
+                contentContainerStyle={{ paddingBottom: insets.bottom + TAB_BAR_TOP_MARGIN }}
                 scrollEnabled={!configuring}
             >
                 <HeaderLayout
