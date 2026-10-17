@@ -1,4 +1,7 @@
-// Must be the same as the height of 'tabBarStyle.height' because the tab bar
-// floats over screen content due to position: absolute, so content can slide
-// under it. So each tab's own scrollable content needs to reserve this much space
-export const TAB_BAR_HEIGHT = 64;
+// Gap kept between a focused text field and the top of the keyboard when a
+// KeyboardAwareScrollView scrolls it into view.
+export const KEYBOARD_FIELD_OFFSET = 24;
+
+// Gap kept between the bottom of a KeyboardAwareScrollView and the top of the
+// tab bar, so that the scroll view's content is not hidden behind the tab bar.
+export const TAB_BAR_TOP_MARGIN = 8;

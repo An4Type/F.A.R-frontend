@@ -2,12 +2,13 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { useCameraPermissions } from "expo-camera";
 import { router } from "expo-router";
 import { useState } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { Text, View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScreenHeader } from "@/components/layout/ScreenHeader";
 import { Button } from "@/components/ui/Button";
 import { Toast } from "@/components/ui/Toast";
-import { TAB_BAR_HEIGHT } from "@/constants/layout";
+import { KEYBOARD_FIELD_OFFSET, TAB_BAR_TOP_MARGIN } from "@/constants/layout";
 import { colors } from "@/constants/theme";
 import { CameraCapture } from "@/features/food/components/CameraCapture";
 import { CategoryTile } from "@/features/food/components/CategoryTile";
@@ -58,10 +59,11 @@ export function LogMealScreen() {
                 }
             />
 
-            <ScrollView
+            <KeyboardAwareScrollView
+                bottomOffset={KEYBOARD_FIELD_OFFSET}
                 className="flex-1"
                 contentContainerClassName="px-xl py-2xl"
-                contentContainerStyle={{ paddingBottom: TAB_BAR_HEIGHT + insets.bottom + 20 }}
+                contentContainerStyle={{ paddingBottom: insets.bottom + TAB_BAR_TOP_MARGIN }}
             >
                 <Button
                     fullWidth
@@ -102,7 +104,7 @@ export function LogMealScreen() {
                         ))}
                     </View>
                 )}
-            </ScrollView>
+            </KeyboardAwareScrollView>
 
             <Toast
                 message="Meal logged"

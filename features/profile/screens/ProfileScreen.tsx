@@ -1,10 +1,11 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { type ComponentProps, useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScreenHeader } from "@/components/layout/ScreenHeader";
 import { Button } from "@/components/ui/Button";
-import { TAB_BAR_HEIGHT } from "@/constants/layout";
+import { KEYBOARD_FIELD_OFFSET, TAB_BAR_TOP_MARGIN } from "@/constants/layout";
 import { colors } from "@/constants/theme";
 import { useAuthStore } from "@/features/auth";
 import { CircularGoalControl } from "@/features/profile/components/CircularGoalControl";
@@ -52,10 +53,11 @@ export function ProfileScreen() {
         <View className="flex-1 bg-surface-subtle-2">
             <ScreenHeader title="Profile" />
 
-            <ScrollView
+            <KeyboardAwareScrollView
+                bottomOffset={KEYBOARD_FIELD_OFFSET}
                 className="flex-1"
                 contentContainerClassName="p-xl"
-                contentContainerStyle={{ paddingBottom: TAB_BAR_HEIGHT + insets.bottom + 20 }}
+                contentContainerStyle={{ paddingBottom: insets.bottom + TAB_BAR_TOP_MARGIN }}
             >
                 <View className="items-center rounded-card bg-surface-card p-lg shadow-sm">
                     <Text className="mb-2xs font-body-semibold text-sm text-text-secondary">
@@ -105,7 +107,7 @@ export function ProfileScreen() {
                     <Ionicons name="log-out-outline" size={19} color={colors.action.danger} />
                     <Text className="font-body-medium text-xs text-action-danger">Log out</Text>
                 </Pressable>
-            </ScrollView>
+            </KeyboardAwareScrollView>
         </View>
     );
 }

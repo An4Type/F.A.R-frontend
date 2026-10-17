@@ -1,11 +1,13 @@
 import { useState, type ComponentProps, type ReactNode } from "react";
 import { View } from "react-native";
+import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import Animated, {
     interpolate,
     useAnimatedStyle,
     useSharedValue,
     withTiming,
 } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { scheduleOnRN } from "react-native-worklets";
 import { authApi } from "@/features/auth/api";
 import { AuthHeader } from "@/features/auth/components/AuthHeader";
@@ -15,16 +17,20 @@ import { RegisterForm } from "@/features/auth/components/RegisterForm";
 import type { LoginFormValues } from "@/features/auth/schemas/loginSchema";
 import type { RegisterFormValues } from "@/features/auth/schemas/registerSchema";
 import { useOnboardingStore } from "@/features/auth/store/onboardingStore";
+import { TAB_BAR_TOP_MARGIN } from "@/constants/layout";
 
 type Stage = "onboarding" | "auth";
 type Facing = "front" | "back";
 
 const FLIP_DURATION = 500;
 
+const CARD_HEIGHT = 460;
+
 export function LoginScreen() {
     const hasOnboarded = useOnboardingStore((state) => state.hasOnboarded);
     const completeOnboarding = useOnboardingStore((state) => state.completeOnboarding);
     const { loginRequest, registerRequest } = authApi;
+    const insets = useSafeAreaInsets();
 
     // Onboarding, login and register share one two-face flip card: `stage`
     // decides what the faces hold (onboarding + login, or login + register)
@@ -100,23 +106,33 @@ export function LoginScreen() {
 
     return (
         <View className="flex-1 bg-action-primary">
-            <AuthHeader title="AnyMeal" />
-            <View className="h-[460px]">
-                <FlipFace style={frontStyle} interactive={facing === "front"}>
-                    {stage === "onboarding" ? (
-                        <Onboarding finishOnboarding={finishOnboarding} />
-                    ) : (
-                        loginForm
-                    )}
-                </FlipFace>
-                <FlipFace style={backStyle} interactive={facing === "back"}>
-                    {stage === "onboarding" ? (
-                        loginForm
-                    ) : (
-                        <RegisterForm onSubmit={handleSignUp} onCancel={goToLogin} />
-                    )}
-                </FlipFace>
-            </View>
+            <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
+                <AuthHeader title="AnyMeal" />
+                <View style={{ height: CARD_HEIGHT + insets.bottom + TAB_BAR_TOP_MARGIN }}>
+                    <FlipFace
+                        style={frontStyle}
+                        interactive={facing === "front"}
+                        bottomInset={insets.bottom}
+                    >
+                        {stage === "onboarding" ? (
+                            <Onboarding finishOnboarding={finishOnboarding} />
+                        ) : (
+                            loginForm
+                        )}
+                    </FlipFace>
+                    <FlipFace
+                        style={backStyle}
+                        interactive={facing === "back"}
+                        bottomInset={insets.bottom}
+                    >
+                        {stage === "onboarding" ? (
+                            loginForm
+                        ) : (
+                            <RegisterForm onSubmit={handleSignUp} onCancel={goToLogin} />
+                        )}
+                    </FlipFace>
+                </View>
+            </KeyboardAvoidingView>
         </View>
     );
 }
@@ -128,10 +144,12 @@ export function LoginScreen() {
 function FlipFace({
     style,
     interactive,
+    bottomInset,
     children,
 }: {
     style: ComponentProps<typeof Animated.View>["style"];
     interactive: boolean;
+    bottomInset: number;
     children: ReactNode;
 }) {
     return (
@@ -143,7 +161,10 @@ function FlipFace({
                 { position: "absolute", top: 0, left: 0, right: 0, bottom: 0 },
             ]}
         >
-            <View className="flex-1 items-center rounded-t-2xl bg-surface-card shadow-lg">
+            <View
+                className="flex-1 items-center rounded-t-2xl bg-surface-card shadow-lg"
+                style={{ paddingBottom: bottomInset }}
+            >
                 {children}
             </View>
         </Animated.View>

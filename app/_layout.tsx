@@ -17,11 +17,13 @@ import { DefaultTheme, ThemeProvider } from "expo-router/react-navigation";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { KeyboardProvider } from "react-native-keyboard-controller";
 import "react-native-reanimated";
 import "@/global.css";
 import "@/lib/nativewindInterop";
 
 import { BlurTargetProvider } from "@/components/ui/BlurTarget";
+import { PortalProvider } from "@/components/ui/Portal";
 import { colors } from "@/constants/theme";
 import { useRouteGuard } from "@/features/auth";
 import { queryClient } from "@/lib/queryClient";
@@ -42,6 +44,7 @@ function RootNavigator() {
         <Stack>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="login" options={{ headerShown: false }} />
+            <Stack.Screen name="history" options={{ headerShown: false }} />
             <Stack.Screen name="+not-found" />
         </Stack>
     );
@@ -72,13 +75,17 @@ export default function RootLayout() {
 
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
-            <QueryClientProvider client={queryClient}>
-                <ThemeProvider value={navigationTheme}>
-                    <BlurTargetProvider>
-                        <RootNavigator />
-                    </BlurTargetProvider>
-                </ThemeProvider>
-            </QueryClientProvider>
+            <KeyboardProvider statusBarTranslucent navigationBarTranslucent preserveEdgeToEdge>
+                <QueryClientProvider client={queryClient}>
+                    <ThemeProvider value={navigationTheme}>
+                        <PortalProvider>
+                            <BlurTargetProvider>
+                                <RootNavigator />
+                            </BlurTargetProvider>
+                        </PortalProvider>
+                    </ThemeProvider>
+                </QueryClientProvider>
+            </KeyboardProvider>
         </GestureHandlerRootView>
     );
 }

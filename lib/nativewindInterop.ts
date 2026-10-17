@@ -5,6 +5,11 @@
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import { cssInterop } from "nativewind";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 
 cssInterop(BlurView, { className: "style" });
 cssInterop(LinearGradient, { className: "style" });
+cssInterop(KeyboardAwareScrollView, {
+    className: "style",
+    contentContainerClassName: "contentContainerStyle",
+});
