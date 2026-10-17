@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { scheduleOnRN } from "react-native-worklets";
 import Svg, { Circle } from "react-native-svg";
 import { colors } from "@/constants/theme";
 
@@ -22,8 +23,10 @@ const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 // (the tap-to-type value) and the outside pass through to other handlers.
 const RING_HIT_SLOP = 34;
 
-const isOnRing = (x: number, y: number) =>
-    Math.abs(Math.hypot(x - CENTER, y - CENTER) - RADIUS) <= RING_HIT_SLOP;
+const isOnRing = (x: number, y: number) => {
+    "worklet";
+    return Math.abs(Math.hypot(x - CENTER, y - CENTER) - RADIUS) <= RING_HIT_SLOP;
+};
 
 export function CircularGoalControl({
     value = 2000,
@@ -35,7 +38,6 @@ export function CircularGoalControl({
 }: CircularGoalControlProps) {
     const [editing, setEditing] = useState(false);
     const [draft, setDraft] = useState(String(value));
-    const inputRef = useRef<TextInput>(null);
 
     const isOver = value > max;
     const pct = isOver ? 1 : Math.max(0, (value - min) / (max - min));
@@ -67,19 +69,22 @@ export function CircularGoalControl({
     // Event x/y are relative to the ring itself, so no on-screen measuring is
     // needed. Manual activation claims touches on the ring band immediately
     // (before a surrounding ScrollView can) and lets everything else through.
+    // The callbacks are worklets: activate()/fail() must run on the UI thread,
+    // and only the value update is sent back to JS.
     const pan = Gesture.Pan()
-        .runOnJS(true)
         .manualActivation(true)
         .onTouchesDown((e, manager) => {
             const touch = e.changedTouches[0];
             if (touch && isOnRing(touch.x, touch.y)) {
                 manager.activate();
-                dragTo(touch.x, touch.y);
+                scheduleOnRN(dragTo, touch.x, touch.y);
             } else {
                 manager.fail();
             }
         })
-        .onUpdate((e) => dragTo(e.x, e.y));
+        .onUpdate((e) => {
+            scheduleOnRN(dragTo, e.x, e.y);
+        });
 
     const step_ = (delta: number) => onChange?.(Math.max(min, value + delta));
 
@@ -93,10 +98,6 @@ export function CircularGoalControl({
         if (!isNaN(n) && n > 0) onChange?.(n);
         setEditing(false);
     };
-
-    useEffect(() => {
-        if (editing) inputRef.current?.focus();
-    }, [editing]);
 
     return (
         <View className="items-center gap-lg">
@@ -146,9 +147,12 @@ export function CircularGoalControl({
                     ) : null}
 
                     <View className="absolute inset-0 items-center justify-center">
+                        {/* autoFocus rather than focus() in an effect: on Android
+                            the effect ran before the input could take focus, so
+                            the keyboard needed a second tap. */}
                         {editing ? (
                             <TextInput
-                                ref={inputRef}
+                                autoFocus
                                 value={draft}
                                 onChangeText={setDraft}
                                 onBlur={commitEdit}
