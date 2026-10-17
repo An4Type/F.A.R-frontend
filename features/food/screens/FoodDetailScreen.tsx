@@ -1,16 +1,18 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useQueryClient } from "@tanstack/react-query";
-import { router, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { Text, View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScreenHeader } from "@/components/layout/ScreenHeader";
 import { Button } from "@/components/ui/Button";
 import { TextInput } from "@/components/ui/TextInput";
-import { TAB_BAR_HEIGHT } from "@/constants/layout";
+import { KEYBOARD_FIELD_OFFSET, TAB_BAR_TOP_MARGIN } from "@/constants/layout";
 import { colors } from "@/constants/theme";
 import { MacroStatBar } from "@/features/food/components/MacroStatBar";
 import { dayInfoQueryKey } from "@/features/food/queries/useDayInfo";
+import { goBack } from "@/lib/navigation";
 
 // No backend endpoint exists for per-item detail yet, so this stays a
 // local/mocked view: params carry name+cal, "Remove entry" is an optimistic
@@ -27,7 +29,7 @@ export function FoodDetailScreen() {
 
     const handleRemove = () => {
         queryClient.invalidateQueries({ queryKey: dayInfoQueryKey });
-        router.back();
+        goBack("/search");
     };
 
     return (
@@ -35,13 +37,14 @@ export function FoodDetailScreen() {
             <ScreenHeader
                 title={name}
                 subtitle={`${Math.round(baseCal * scale)} cal`}
-                onBack={() => router.back()}
+                onBack={() => goBack("/search")}
             />
 
-            <ScrollView
+            <KeyboardAwareScrollView
+                bottomOffset={KEYBOARD_FIELD_OFFSET}
                 className="flex-1"
                 contentContainerClassName="px-xl pt-2xl"
-                contentContainerStyle={{ paddingBottom: TAB_BAR_HEIGHT + insets.bottom + 20 }}
+                contentContainerStyle={{ paddingBottom: insets.bottom + TAB_BAR_TOP_MARGIN }}
             >
                 <View className="mx-auto w-full max-w-[320px]">
                     <MacroStatBar
@@ -70,7 +73,7 @@ export function FoodDetailScreen() {
                         Remove entry
                     </Text>
                 </Button>
-            </ScrollView>
+            </KeyboardAwareScrollView>
         </View>
     );
 }

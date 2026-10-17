@@ -7,7 +7,7 @@ import { EmptyState } from "@/components/layout/EmptyState";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { IconButton } from "@/components/ui/IconButton";
-import { TAB_BAR_HEIGHT } from "@/constants/layout";
+import { TAB_BAR_TOP_MARGIN } from "@/constants/layout";
 import { colors } from "@/constants/theme";
 import { FoodListItem, useDayInfoQuery } from "@/features/food";
 
@@ -65,7 +65,7 @@ export function TodayScreen() {
             <ScrollView
                 className="flex-1"
                 contentContainerClassName="gap-sm p-xl"
-                contentContainerStyle={{ paddingBottom: TAB_BAR_HEIGHT + insets.bottom + 20 }}
+                contentContainerStyle={{ paddingBottom: insets.bottom + TAB_BAR_TOP_MARGIN }}
             >
                 {foodConsumed.length === 0 ? (
                     <EmptyState

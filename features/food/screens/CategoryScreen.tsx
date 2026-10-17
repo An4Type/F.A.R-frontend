@@ -3,12 +3,13 @@ import { ActivityIndicator, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { EmptyState } from "@/components/layout/EmptyState";
 import { ScreenHeader } from "@/components/layout/ScreenHeader";
-import { TAB_BAR_HEIGHT } from "@/constants/layout";
+import { TAB_BAR_TOP_MARGIN } from "@/constants/layout";
 import { colors } from "@/constants/theme";
 import { FoodListItem } from "@/features/food/components/FoodListItem";
 import { getCategoryBySlug } from "@/features/food/constants";
 import { useCategoryFoods } from "@/features/food/queries/useCategoryFoods";
 import type { CategoryFood } from "@/features/food/types";
+import { goBack } from "@/lib/navigation";
 
 export function CategoryScreen() {
     const insets = useSafeAreaInsets();
@@ -28,13 +29,13 @@ export function CategoryScreen() {
             <ScreenHeader
                 title={category?.label ?? "Category"}
                 titleIcon={category?.icon}
-                onBack={() => router.back()}
+                onBack={() => goBack("/search")}
             />
 
             <ScrollView
                 className="flex-1"
                 contentContainerClassName="gap-sm p-xl"
-                contentContainerStyle={{ paddingBottom: TAB_BAR_HEIGHT + insets.bottom + 20 }}
+                contentContainerStyle={{ paddingBottom: insets.bottom + TAB_BAR_TOP_MARGIN }}
             >
                 {isLoading ? (
                     <ActivityIndicator

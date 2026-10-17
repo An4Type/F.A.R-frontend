@@ -1,14 +1,14 @@
-import { router } from "expo-router";
 import { useState } from "react";
 import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScreenHeader } from "@/components/layout/ScreenHeader";
 import { Card } from "@/components/ui/Card";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
-import { TAB_BAR_HEIGHT } from "@/constants/layout";
 import { colors } from "@/constants/theme";
 import { useWeeklyHistory } from "@/features/diary/queries/useWeeklyHistory";
 import { useProfileStore } from "@/features/profile";
+import { goBack } from "@/lib/navigation";
+import { TAB_BAR_TOP_MARGIN } from "@/constants/layout";
 
 const RANGE_OPTIONS = ["Day", "Week", "Month"];
 const CHART_HEIGHT = 140;
@@ -28,12 +28,13 @@ export function HistoryScreen() {
 
     return (
         <View className="flex-1 bg-surface-app">
-            <ScreenHeader title="History" onBack={() => router.back()} />
+            <View className="bg-surface-hero" style={{ height: insets.top }} />
+            <ScreenHeader title="History" onBack={() => goBack("/explore")} />
 
             <ScrollView
                 className="flex-1"
                 contentContainerClassName="px-xl pt-2xl"
-                contentContainerStyle={{ paddingBottom: TAB_BAR_HEIGHT + insets.bottom + 20 }}
+                contentContainerStyle={{ paddingBottom: insets.bottom + TAB_BAR_TOP_MARGIN }}
             >
                 <SegmentedControl options={RANGE_OPTIONS} value={range} onChange={setRange} />
 
