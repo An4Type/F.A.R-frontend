@@ -26,6 +26,7 @@ import { BlurTargetProvider } from "@/components/ui/BlurTarget";
 import { PortalProvider } from "@/components/ui/Portal";
 import { colors } from "@/constants/theme";
 import { useRouteGuard } from "@/features/auth";
+import { useDatabase } from "@/lib/db/useDatabase";
 import { queryClient } from "@/lib/queryClient";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -52,6 +53,7 @@ function RootNavigator() {
 
 export default function RootLayout() {
     // Load fonts before rendering the app. Should be defined like so due to NativeWind's lack of support for font loading
+    // ! Namings are poor needs to be reviewed in future
     const [loaded] = useFonts({
         Inter_400Regular,
         Inter_500Medium,
@@ -63,13 +65,22 @@ export default function RootLayout() {
         PlusJakartaSans_700Bold,
     });
 
+    // Migrate the device database before any screen can read it.
+    const database = useDatabase();
+    const databaseSettled = database.ready || database.error !== undefined;
+
     useEffect(() => {
-        if (loaded) {
+        // Placeholder for failed migrations as for now nothing is using database
+        if (database.error) console.error("Database migration failed:", database.error);
+    }, [database.error]);
+
+    useEffect(() => {
+        if (loaded && databaseSettled) {
             SplashScreen.hideAsync();
         }
-    }, [loaded]);
+    }, [loaded, databaseSettled]);
 
-    if (!loaded) {
+    if (!loaded || !databaseSettled) {
         return null;
     }
 
