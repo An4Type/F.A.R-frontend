@@ -10,7 +10,7 @@ import {
     timeOfDay,
     timestamp,
     uuid,
-} from "@/lib/contracts/common";
+} from "./common";
 
 /**
  * Refine function that validates so both serving_id, serving_count must be defined or null

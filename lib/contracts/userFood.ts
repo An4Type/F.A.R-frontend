@@ -1,13 +1,5 @@
 import * as z from "zod";
-import {
-    catalogId,
-    foodRefFields,
-    grams,
-    kcal,
-    refineFoodRef,
-    syncFields,
-    uuid,
-} from "@/lib/contracts/common";
+import { catalogId, foodRefFields, grams, kcal, refineFoodRef, syncFields, uuid } from "./common";
 
 // Foods a user adds or adjusts, and the lookups (servings, barcodes) that can
 // be also redefined/added by user

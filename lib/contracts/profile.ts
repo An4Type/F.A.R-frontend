@@ -11,7 +11,7 @@ import {
     timeOfDay,
     timestamp,
     uuid,
-} from "@/lib/contracts/common";
+} from "./common";
 
 export const appUser = z.object({
     id: uuid,

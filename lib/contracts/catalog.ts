@@ -1,5 +1,5 @@
 import * as z from "zod";
-import { catalogId, grams, kcal, locale, timeOfDay, timestamp } from "@/lib/contracts/common";
+import { catalogId, grams, kcal, locale, timeOfDay, timestamp } from "./common";
 
 // This file defines server-owned reference data. Read-only on the device.
 // Is pulled up from the server.

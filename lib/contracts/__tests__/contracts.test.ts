@@ -1,4 +1,4 @@
-import { food, logEntry, mealGroup, reminder, userFood, userFoodIngredient } from "@/lib/contracts";
+import { food, logEntry, mealGroup, reminder, userFood, userFoodIngredient } from "..";
 
 const USER = "0192f3a4-5b6c-7d8e-9f01-23456789abcd";
 const OTHER = "0192f3a4-5b6c-7d8e-9f01-23456789abce";

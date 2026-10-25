@@ -1,5 +1,5 @@
 import * as z from "zod";
-import { catalogId, kcal, syncFields, timestamp, uuid } from "@/lib/contracts/common";
+import { catalogId, kcal, syncFields, timestamp, uuid } from "./common";
 
 export const activitySource = z.enum(["manual", "health_kit", "health_connect"]);
 export type ActivitySource = z.infer<typeof activitySource>;
