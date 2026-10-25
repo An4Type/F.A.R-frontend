@@ -1,6 +1,6 @@
 import { getTableColumns, type Table } from "drizzle-orm";
 import type * as z from "zod";
-import * as contracts from "@/lib/contracts";
+import * as contracts from "@anymeal/contracts";
 import * as schema from "@/lib/db/schema";
 
 // Every table's columns must be exactly its contract's fields, so a row read
